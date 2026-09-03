@@ -359,7 +359,7 @@ def register_metadata():
         {
             "type": 7,
             "key": "member",
-            "name": "RAVESZN CLUB Member",
+            "name": "SZN FAM",
             "description": "Member of RAVESZN CLUB!"
         }
     ]
