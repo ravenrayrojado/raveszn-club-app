@@ -52,6 +52,7 @@ def terms():
     <head>
         <title>RAVESZN CLUB! - Terms of Service</title>
         <meta charset="UTF-8">
+
         <style>
             body {
                 background: #111;
@@ -62,9 +63,19 @@ def terms():
                 padding: 20px;
                 line-height: 1.6;
             }
+
+            h1 {
+                color: white;
+            }
+
+            p {
+                color: #ddd;
+            }
         </style>
     </head>
+
     <body>
+
         <h1>RAVESZN CLUB! Terms of Service</h1>
 
         <p>
@@ -87,6 +98,7 @@ def terms():
             By authorizing the application, you agree to
             these terms.
         </p>
+
     </body>
     </html>
     """)
@@ -104,6 +116,7 @@ def privacy():
     <head>
         <title>RAVESZN CLUB! - Privacy Policy</title>
         <meta charset="UTF-8">
+
         <style>
             body {
                 background: #111;
@@ -114,9 +127,19 @@ def privacy():
                 padding: 20px;
                 line-height: 1.6;
             }
+
+            h1 {
+                color: white;
+            }
+
+            p {
+                color: #ddd;
+            }
         </style>
     </head>
+
     <body>
+
         <h1>RAVESZN CLUB! Privacy Policy</h1>
 
         <p>
@@ -138,6 +161,7 @@ def privacy():
         <p>
             RAVESZN CLUB! does not sell personal information.
         </p>
+
     </body>
     </html>
     """)
@@ -176,9 +200,6 @@ def connect():
 
 # =========================================================
 # LINKED ROLES VERIFICATION URL
-#
-# Discord can use this URL when the app is selected
-# as a Linked Role verification method.
 # =========================================================
 
 @app.get("/api/verify-user")
@@ -198,7 +219,7 @@ def callback(
 ):
 
     # -----------------------------------------------------
-    # Make sure Discord sent an authorization code
+    # CHECK AUTHORIZATION CODE
     # -----------------------------------------------------
 
     if not code:
@@ -208,7 +229,7 @@ def callback(
         )
 
     # -----------------------------------------------------
-    # Verify OAuth state
+    # VERIFY OAUTH STATE
     # -----------------------------------------------------
 
     saved_state = request.cookies.get("oauth_state")
@@ -223,12 +244,12 @@ def callback(
         )
 
     # -----------------------------------------------------
-    # Exchange Discord authorization code
-    # for an OAuth access token
+    # EXCHANGE CODE FOR ACCESS TOKEN
     # -----------------------------------------------------
 
     token_response = requests.post(
         f"{DISCORD_API}/oauth2/token",
+
         data={
             "client_id": DISCORD_CLIENT_ID,
             "client_secret": DISCORD_CLIENT_SECRET,
@@ -236,16 +257,20 @@ def callback(
             "code": code,
             "redirect_uri": REDIRECT_URI
         },
+
         headers={
             "Content-Type": "application/x-www-form-urlencoded"
         },
+
         timeout=15
     )
 
     if token_response.status_code != 200:
         return HTMLResponse(
-            "<h2>Discord OAuth token exchange failed.</h2>"
-            "<p>Please try again.</p>",
+            """
+            <h2>Discord OAuth token exchange failed.</h2>
+            <p>Please try again.</p>
+            """,
             status_code=400
         )
 
@@ -260,7 +285,15 @@ def callback(
         )
 
     # -----------------------------------------------------
-    # Update the user's Discord Role Connection
+    # UPDATE DISCORD ROLE CONNECTION
+    #
+    # IMPORTANT:
+    #
+    # platform_name     = RAVESZN CLUB!
+    # platform_username = SZN FAM
+    #
+    # This prevents Discord from displaying
+    # RAVESZN CLUB! twice.
     # -----------------------------------------------------
 
     connection_response = requests.put(
@@ -274,7 +307,8 @@ def callback(
 
         json={
             "platform_name": "RAVESZN CLUB!",
-            "platform_username": "RAVESZN CLUB!",
+            "platform_username": "SZN FAM",
+
             "metadata": {
                 "member": "1"
             }
@@ -285,18 +319,21 @@ def callback(
 
     if connection_response.status_code not in (200, 204):
         return HTMLResponse(
-            "<h2>Discord connection update failed.</h2>"
-            "<p>Please try connecting again.</p>",
+            """
+            <h2>Discord connection update failed.</h2>
+            <p>Please try connecting again.</p>
+            """,
             status_code=400
         )
 
     # -----------------------------------------------------
-    # Success
+    # SUCCESS PAGE
     # -----------------------------------------------------
 
     response = HTMLResponse("""
     <!DOCTYPE html>
     <html>
+
     <head>
         <title>RAVESZN CLUB!</title>
 
@@ -329,6 +366,7 @@ def callback(
         <p>You can close this window.</p>
 
     </body>
+
     </html>
     """)
 
