@@ -1,254 +1,149 @@
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
+import os
+import secrets
+import requests
 
 app = FastAPI()
 
+DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
+DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET")
 
-@app.get("/terms", response_class=HTMLResponse)
-def terms():
-    return """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAVESZN CLUB! — Terms of Service</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 40px 20px;
-            background: #111214;
-            color: #f2f3f5;
-            font-family: Arial, sans-serif;
-            line-height: 1.7;
-        }
+REDIRECT_URI = "https://raveszn-club-app.vercel.app/api/callback"
 
-        main {
-            max-width: 800px;
-            margin: auto;
-            background: #1e1f22;
-            padding: 40px;
-            border-radius: 20px;
-        }
-
-        h1 {
-            margin-top: 0;
-        }
-
-        h2 {
-            margin-top: 32px;
-        }
-
-        .updated {
-            color: #b5bac1;
-        }
-    </style>
-</head>
-
-<body>
-<main>
-
-<h1>RAVESZN CLUB! — Terms of Service</h1>
-
-<p class="updated">Last updated: September 3, 2026</p>
-
-<p>
-Welcome to RAVESZN CLUB!. These Terms of Service explain the rules
-for using the RAVESZN CLUB! Discord application.
-</p>
-
-<h2>1. Acceptance of Terms</h2>
-
-<p>
-By installing or using the RAVESZN CLUB! application, you agree to
-these Terms of Service. If you do not agree, please do not use the
-application.
-</p>
-
-<h2>2. Use of the Application</h2>
-
-<p>
-RAVESZN CLUB! provides features and functionality for the
-RAVESZN CLUB! Discord community. You agree to use the application
-lawfully and in accordance with Discord's rules and policies.
-</p>
-
-<h2>3. Discord</h2>
-
-<p>
-RAVESZN CLUB! operates through Discord. Your use of Discord remains
-subject to Discord's Terms of Service, Community Guidelines, and
-other applicable policies.
-</p>
-
-<h2>4. Availability</h2>
-
-<p>
-We may modify, update, suspend, or discontinue the application or
-any of its features at any time.
-</p>
-
-<h2>5. Prohibited Use</h2>
-
-<p>
-You may not use the application to abuse, harass, spam, exploit,
-disrupt, or otherwise misuse Discord or other users.
-</p>
-
-<h2>6. Disclaimer</h2>
-
-<p>
-The application is provided on an "as is" and "as available" basis.
-We do not guarantee that the application will always be available
-or error-free.
-</p>
-
-<h2>7. Changes</h2>
-
-<p>
-These Terms may be updated from time to time. Continued use of the
-application after changes are published means you accept the
-updated Terms.
-</p>
-
-<h2>8. Contact</h2>
-
-<p>
-For questions about these Terms, please contact the RAVESZN CLUB!
-server administration team through the official Discord server.
-</p>
-
-</main>
-</body>
-</html>
-"""
-
-
-@app.get("/privacy", response_class=HTMLResponse)
-def privacy():
-    return """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAVESZN CLUB! — Privacy Policy</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 40px 20px;
-            background: #111214;
-            color: #f2f3f5;
-            font-family: Arial, sans-serif;
-            line-height: 1.7;
-        }
-
-        main {
-            max-width: 800px;
-            margin: auto;
-            background: #1e1f22;
-            padding: 40px;
-            border-radius: 20px;
-        }
-
-        h1 {
-            margin-top: 0;
-        }
-
-        h2 {
-            margin-top: 32px;
-        }
-
-        .updated {
-            color: #b5bac1;
-        }
-    </style>
-</head>
-
-<body>
-<main>
-
-<h1>RAVESZN CLUB! — Privacy Policy</h1>
-
-<p class="updated">Last updated: September 3, 2026</p>
-
-<p>
-This Privacy Policy explains how the RAVESZN CLUB! Discord
-application handles information when you use it.
-</p>
-
-<h2>1. Information We Collect</h2>
-
-<p>
-RAVESZN CLUB! only accesses information necessary for the features
-provided by the application and permitted through Discord's
-authorization system.
-</p>
-
-<h2>2. How Information Is Used</h2>
-
-<p>
-Information accessed by the application is used to provide,
-maintain, and improve the application's functionality within
-Discord.
-</p>
-
-<h2>3. Information Sharing</h2>
-
-<p>
-We do not sell your personal information. We do not intentionally
-share personal information with third parties except where
-necessary to operate the application or comply with applicable law.
-</p>
-
-<h2>4. Data Retention</h2>
-
-<p>
-Information is retained only for as long as reasonably necessary
-to provide the application's functionality, maintain security,
-or meet legal requirements.
-</p>
-
-<h2>5. Discord</h2>
-
-<p>
-Because the application operates through Discord, Discord may
-independently collect and process information according to
-Discord's own Privacy Policy.
-</p>
-
-<h2>6. Security</h2>
-
-<p>
-Reasonable measures are used to protect information handled by
-the application. However, no online service can guarantee
-absolute security.
-</p>
-
-<h2>7. Changes to This Policy</h2>
-
-<p>
-This Privacy Policy may be updated when the application's
-functionality or data practices change.
-</p>
-
-<h2>8. Contact</h2>
-
-<p>
-For questions about this Privacy Policy, please contact the
-RAVESZN CLUB! server administration team through the official
-Discord server.
-</p>
-
-</main>
-</body>
-</html>
-"""
+DISCORD_API = "https://discord.com/api/v10"
 
 
 @app.get("/")
 def home():
+    return FileResponse("index.html")
+
+
+@app.get("/api")
+def api_home():
     return {
-        "name": "RAVESZN CLUB!",
-        "status": "online"
+        "status": "online",
+        "message": "RAVESZN CLUB! App is working."
     }
+
+
+@app.get("/api/connect")
+def connect():
+    state = secrets.token_urlsafe(32)
+
+    discord_url = (
+        "https://discord.com/oauth2/authorize"
+        f"?client_id={DISCORD_CLIENT_ID}"
+        "&response_type=code"
+        f"&redirect_uri={REDIRECT_URI}"
+        "&scope=identify%20role_connections.write"
+        f"&state={state}"
+    )
+
+    response = RedirectResponse(discord_url)
+
+    response.set_cookie(
+        key="oauth_state",
+        value=state,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=600
+    )
+
+    return response
+
+
+@app.get("/api/callback")
+def callback(request: Request, code: str = None, state: str = None):
+
+    saved_state = request.cookies.get("oauth_state")
+
+    if not code:
+        return HTMLResponse(
+            "<h2>Missing authorization code.</h2>",
+            status_code=400
+        )
+
+    if not state or state != saved_state:
+        return HTMLResponse(
+            "<h2>Invalid OAuth state.</h2>",
+            status_code=400
+        )
+
+    # Exchange authorization code for access token
+    token_response = requests.post(
+        f"{DISCORD_API}/oauth2/token",
+        data={
+            "client_id": DISCORD_CLIENT_ID,
+            "client_secret": DISCORD_CLIENT_SECRET,
+            "grant_type": "authorization_code",
+            "code": code,
+            "redirect_uri": REDIRECT_URI
+        },
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        timeout=15
+    )
+
+    if token_response.status_code != 200:
+        return HTMLResponse(
+            "<h2>Discord OAuth token exchange failed.</h2>"
+            f"<pre>{token_response.text}</pre>",
+            status_code=400
+        )
+
+    token_data = token_response.json()
+    access_token = token_data.get("access_token")
+
+    if not access_token:
+        return HTMLResponse(
+            "<h2>No Discord access token received.</h2>",
+            status_code=400
+        )
+
+    # Update the user's application role connection
+    connection_response = requests.put(
+        f"{DISCORD_API}/users/@me/applications/{DISCORD_CLIENT_ID}/role-connection",
+        headers={
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        },
+        json={
+            "platform_name": "RAVESZN CLUB!",
+            "platform_username": "RAVESZN CLUB!",
+            "metadata": {}
+        },
+        timeout=15
+    )
+
+    if connection_response.status_code not in (200, 204):
+        return HTMLResponse(
+            "<h2>Discord connection update failed.</h2>"
+            f"<pre>{connection_response.text}</pre>",
+            status_code=400
+        )
+
+    response = HTMLResponse("""
+        <html>
+        <head>
+            <title>RAVESZN CLUB!</title>
+        </head>
+        <body style="
+            background:#111;
+            color:white;
+            font-family:Arial,sans-serif;
+            text-align:center;
+            padding:80px 20px;
+        ">
+            <h1>RAVESZN CLUB! 🎉</h1>
+            <p>Your Discord connection has been updated.</p>
+            <p>You can close this window.</p>
+        </body>
+        </html>
+    """)
+
+    response.delete_cookie("oauth_state")
+
+    return response
