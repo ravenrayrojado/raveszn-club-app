@@ -12,6 +12,7 @@ app = FastAPI()
 
 DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
 DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET")
+DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 
 REDIRECT_URI = "https://raveszn-club-app.vercel.app/api/callback"
 
@@ -167,6 +168,71 @@ def privacy():
 
 
 # =========================================================
+# REGISTER / UPDATE METADATA SCHEMA
+#
+# This changes:
+#
+# key:         member
+# name:        Verified
+# description: Member of RAVESZN CLUB!
+# type:        BOOLEAN_EQUAL
+#
+# The key stays "member" so your existing
+# SZN FAM Linked Role continues using the same requirement.
+# =========================================================
+
+@app.get("/api/register-metadata")
+def register_metadata():
+
+    if not DISCORD_BOT_TOKEN:
+        return {
+            "status": "error",
+            "message": "DISCORD_BOT_TOKEN is not configured."
+        }
+
+    metadata = [
+        {
+            "type": 7,
+            "key": "member",
+            "name": "Verified",
+            "description": "Member of RAVESZN CLUB!"
+        }
+    ]
+
+    response = requests.put(
+        f"{DISCORD_API}/applications/"
+        f"{DISCORD_CLIENT_ID}/role-connections/metadata",
+
+        headers={
+            "Authorization": f"Bot {DISCORD_BOT_TOKEN}",
+            "Content-Type": "application/json"
+        },
+
+        json=metadata,
+
+        timeout=15
+    )
+
+    try:
+        data = response.json()
+    except Exception:
+        data = response.text
+
+    if response.status_code != 200:
+        return {
+            "status": "error",
+            "status_code": response.status_code,
+            "discord_response": data
+        }
+
+    return {
+        "status": "success",
+        "message": "RAVESZN CLUB! metadata updated.",
+        "discord_response": data
+    }
+
+
+# =========================================================
 # START DISCORD OAUTH
 # =========================================================
 
@@ -295,18 +361,24 @@ def callback(
         )
 
     # -----------------------------------------------------
-    # UPDATE DISCORD APPLICATION ROLE CONNECTION
+    # UPDATE USER APPLICATION ROLE CONNECTION
     #
-    # GOOGLE-STYLE VERSION:
+    # PROFILE:
     #
-    # platform_name:
     # RAVESZN CLUB!
-    #
-    # platform_username:
     # SZN FAM
+    # Powered by RAVESZN CLUB!
     #
-    # metadata:
-    # szn_fam = Verified
+    # METADATA:
+    #
+    # member = 1
+    #
+    # "member" is the metadata KEY.
+    # "1" means TRUE for BOOLEAN_EQUAL.
+    #
+    # The metadata DISPLAY NAME is:
+    #
+    # Verified
     #
     # -----------------------------------------------------
 
@@ -322,9 +394,8 @@ def callback(
         json={
             "platform_name": "RAVESZN CLUB!",
             "platform_username": "SZN FAM",
-
             "metadata": {
-                "szn_fam": "Verified"
+                "member": "1"
             }
         },
 
