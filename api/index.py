@@ -252,7 +252,6 @@ def callback(
 
     # -----------------------------------------------------
     # EXCHANGE DISCORD AUTHORIZATION CODE
-    # FOR ACCESS TOKEN
     # -----------------------------------------------------
 
     token_response = requests.post(
@@ -298,12 +297,17 @@ def callback(
     # -----------------------------------------------------
     # UPDATE DISCORD APPLICATION ROLE CONNECTION
     #
-    # DISPLAY:
+    # PROFILE:
     #
     # RAVESZN CLUB!
     # SZN FAM
     # Powered by RAVESZN CLUB!
     #
+    # METADATA VALUE:
+    # member = 1
+    #
+    # The metadata NAME is configured separately
+    # in Discord as "Verified".
     # -----------------------------------------------------
 
     connection_response = requests.put(
@@ -318,6 +322,7 @@ def callback(
         json={
             "platform_name": "RAVESZN CLUB!",
             "platform_username": "SZN FAM",
+
             "metadata": {
                 "member": "1"
             }
