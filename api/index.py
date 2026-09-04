@@ -251,7 +251,8 @@ def callback(
         )
 
     # -----------------------------------------------------
-    # EXCHANGE DISCORD CODE FOR ACCESS TOKEN
+    # EXCHANGE DISCORD AUTHORIZATION CODE
+    # FOR ACCESS TOKEN
     # -----------------------------------------------------
 
     token_response = requests.post(
@@ -276,7 +277,7 @@ def callback(
         return HTMLResponse(
             """
             <h2>Discord OAuth token exchange failed.</h2>
-            <p>Please try again.</p>
+            <p>Please try connecting again.</p>
             """,
             status_code=400
         )
@@ -295,19 +296,14 @@ def callback(
         )
 
     # -----------------------------------------------------
-    # UPDATE APPLICATION ROLE CONNECTION
+    # UPDATE DISCORD APPLICATION ROLE CONNECTION
     #
-    # THIS CONTROLS THE CONNECTION DETAILS SHOWN
-    # BY DISCORD.
+    # DESIRED DISPLAY:
     #
-    # platform_name:
-    #     RAVESZN CLUB!
+    # RAVESZN CLUB!
+    # SZN FAM
+    # Powered by RAVESZN CLUB!
     #
-    # platform_username:
-    #     SZN FAM
-    #
-    # metadata:
-    #     SZN FAM requirement = true
     # -----------------------------------------------------
 
     connection_response = requests.put(
@@ -322,6 +318,7 @@ def callback(
         json={
             "platform_name": "RAVESZN CLUB!",
             "platform_username": "SZN FAM",
+
             "metadata": {
                 "member": "1"
             }
@@ -330,17 +327,28 @@ def callback(
         timeout=15
     )
 
+    # -----------------------------------------------------
+    # CHECK CONNECTION UPDATE
+    # -----------------------------------------------------
+
     if connection_response.status_code not in (200, 204):
+
+        try:
+            error_details = connection_response.json()
+        except Exception:
+            error_details = connection_response.text
+
         return HTMLResponse(
-            """
+            f"""
             <h2>Discord connection update failed.</h2>
             <p>Please try connecting again.</p>
+            <pre>{error_details}</pre>
             """,
             status_code=400
         )
 
     # -----------------------------------------------------
-    # SUCCESS
+    # DELETE ONE-TIME OAUTH COOKIE
     # -----------------------------------------------------
 
     response = HTMLResponse("""
@@ -363,6 +371,7 @@ def callback(
 
             h1 {
                 font-size: 32px;
+                margin-bottom: 15px;
             }
 
             p {
@@ -376,20 +385,15 @@ def callback(
 
         <h1>RAVESZN CLUB! 🎉</h1>
 
-        <p>
-            Your Discord connection has been updated.
-        </p>
+        <p>Your Discord connection has been updated.</p>
 
-        <p>
-            You can close this window.
-        </p>
+        <p>You can close this window.</p>
 
     </body>
 
     </html>
     """)
 
-    # Remove one-time OAuth state cookie
     response.delete_cookie("oauth_state")
 
     return response
