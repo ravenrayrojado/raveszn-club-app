@@ -298,10 +298,10 @@ def callback(
     # -----------------------------------------------------
     # UPDATE DISCORD APPLICATION ROLE CONNECTION
     #
-    # PROFILE CONNECTION:
+    # PROFILE:
     #
     # RAVESZN CLUB!
-    # SZN FAM
+    # Verified
     # Powered by RAVESZN CLUB!
     #
     # -----------------------------------------------------
@@ -317,7 +317,7 @@ def callback(
 
         json={
             "platform_name": "RAVESZN CLUB!",
-            "platform_username": "SZN FAM",
+            "platform_username": "Verified",
             "metadata": {
                 "member": "1"
             }
