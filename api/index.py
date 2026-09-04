@@ -297,17 +297,17 @@ def callback(
     # -----------------------------------------------------
     # UPDATE DISCORD APPLICATION ROLE CONNECTION
     #
-    # PROFILE:
+    # GOOGLE-STYLE VERSION:
     #
+    # platform_name:
     # RAVESZN CLUB!
+    #
+    # platform_username:
     # SZN FAM
-    # Powered by RAVESZN CLUB!
     #
-    # METADATA VALUE:
-    # member = 1
+    # metadata:
+    # szn_fam = Verified
     #
-    # The metadata NAME is configured separately
-    # in Discord as "Verified".
     # -----------------------------------------------------
 
     connection_response = requests.put(
@@ -324,7 +324,7 @@ def callback(
             "platform_username": "SZN FAM",
 
             "metadata": {
-                "member": "Verified"
+                "szn_fam": "Verified"
             }
         },
 
@@ -344,9 +344,50 @@ def callback(
 
         return HTMLResponse(
             f"""
-            <h2>Discord connection update failed.</h2>
-            <p>Please try connecting again.</p>
-            <pre>{error_details}</pre>
+            <!DOCTYPE html>
+            <html>
+
+            <head>
+                <title>RAVESZN CLUB! - Error</title>
+
+                <meta charset="UTF-8">
+
+                <style>
+                    body {{
+                        background: #111;
+                        color: white;
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                        padding: 80px 20px;
+                    }}
+
+                    h2 {{
+                        color: #ff4444;
+                    }}
+
+                    pre {{
+                        background: #222;
+                        padding: 20px;
+                        border-radius: 10px;
+                        text-align: left;
+                        overflow-x: auto;
+                    }}
+                </style>
+            </head>
+
+            <body>
+
+                <h2>Discord connection update failed.</h2>
+
+                <p>
+                    Discord rejected the application role connection.
+                </p>
+
+                <pre>{error_details}</pre>
+
+            </body>
+
+            </html>
             """,
             status_code=400
         )
