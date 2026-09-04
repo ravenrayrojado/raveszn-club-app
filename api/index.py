@@ -324,7 +324,7 @@ def callback(
             "platform_username": "SZN FAM",
 
             "metadata": {
-                "member": "1"
+                "member": "Verified"
             }
         },
 
