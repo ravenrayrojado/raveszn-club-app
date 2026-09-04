@@ -12,7 +12,6 @@ app = FastAPI()
 
 DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
 DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET")
-DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 
 REDIRECT_URI = "https://raveszn-club-app.vercel.app/api/callback"
 
@@ -173,6 +172,7 @@ def privacy():
 
 @app.get("/api/connect")
 def connect():
+
     state = secrets.token_urlsafe(32)
 
     discord_url = (
@@ -224,7 +224,10 @@ def callback(
 
     if not code:
         return HTMLResponse(
-            "<h2>Missing Discord authorization code.</h2>",
+            """
+            <h2>Missing Discord authorization code.</h2>
+            <p>Please start the connection again.</p>
+            """,
             status_code=400
         )
 
@@ -234,7 +237,11 @@ def callback(
 
     saved_state = request.cookies.get("oauth_state")
 
-    if not state or not saved_state or state != saved_state:
+    if (
+        not state
+        or not saved_state
+        or state != saved_state
+    ):
         return HTMLResponse(
             """
             <h2>Invalid OAuth state.</h2>
@@ -244,7 +251,7 @@ def callback(
         )
 
     # -----------------------------------------------------
-    # EXCHANGE CODE FOR ACCESS TOKEN
+    # EXCHANGE DISCORD CODE FOR ACCESS TOKEN
     # -----------------------------------------------------
 
     token_response = requests.post(
@@ -280,20 +287,27 @@ def callback(
 
     if not access_token:
         return HTMLResponse(
-            "<h2>No Discord access token was received.</h2>",
+            """
+            <h2>No Discord access token was received.</h2>
+            <p>Please try again.</p>
+            """,
             status_code=400
         )
 
     # -----------------------------------------------------
-    # UPDATE DISCORD ROLE CONNECTION
+    # UPDATE APPLICATION ROLE CONNECTION
     #
-    # IMPORTANT:
+    # THIS CONTROLS THE CONNECTION DETAILS SHOWN
+    # BY DISCORD.
     #
-    # platform_name     = RAVESZN CLUB!
-    # platform_username = SZN FAM
+    # platform_name:
+    #     RAVESZN CLUB!
     #
-    # This prevents Discord from displaying
-    # RAVESZN CLUB! twice.
+    # platform_username:
+    #     SZN FAM
+    #
+    # metadata:
+    #     SZN FAM requirement = true
     # -----------------------------------------------------
 
     connection_response = requests.put(
@@ -308,7 +322,6 @@ def callback(
         json={
             "platform_name": "RAVESZN CLUB!",
             "platform_username": "SZN FAM",
-
             "metadata": {
                 "member": "1"
             }
@@ -327,7 +340,7 @@ def callback(
         )
 
     # -----------------------------------------------------
-    # SUCCESS PAGE
+    # SUCCESS
     # -----------------------------------------------------
 
     response = HTMLResponse("""
@@ -336,6 +349,8 @@ def callback(
 
     <head>
         <title>RAVESZN CLUB!</title>
+
+        <meta charset="UTF-8">
 
         <style>
             body {
@@ -361,62 +376,20 @@ def callback(
 
         <h1>RAVESZN CLUB! 🎉</h1>
 
-        <p>Your Discord connection has been updated.</p>
+        <p>
+            Your Discord connection has been updated.
+        </p>
 
-        <p>You can close this window.</p>
+        <p>
+            You can close this window.
+        </p>
 
     </body>
 
     </html>
     """)
 
+    # Remove one-time OAuth state cookie
     response.delete_cookie("oauth_state")
 
     return response
-
-
-# =========================================================
-# REGISTER ROLE CONNECTION METADATA
-# =========================================================
-
-@app.get("/api/register-metadata")
-def register_metadata():
-
-    if not DISCORD_BOT_TOKEN:
-        return {
-            "status": "error",
-            "message": "DISCORD_BOT_TOKEN is not configured."
-        }
-
-    headers = {
-        "Authorization": f"Bot {DISCORD_BOT_TOKEN}",
-        "Content-Type": "application/json"
-    }
-
-    metadata = [
-        {
-            "type": 7,
-            "key": "member",
-            "name": "SZN FAM",
-            "description": "Member of RAVESZN CLUB!"
-        }
-    ]
-
-    response = requests.put(
-        f"{DISCORD_API}/applications/"
-        f"{DISCORD_CLIENT_ID}/role-connections/metadata",
-
-        headers=headers,
-        json=metadata,
-        timeout=15
-    )
-
-    try:
-        discord_response = response.json()
-    except Exception:
-        discord_response = response.text
-
-    return {
-        "status_code": response.status_code,
-        "discord_response": discord_response
-    }
