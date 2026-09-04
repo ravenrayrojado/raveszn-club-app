@@ -298,7 +298,7 @@ def callback(
     # -----------------------------------------------------
     # UPDATE DISCORD APPLICATION ROLE CONNECTION
     #
-    # DESIRED DISPLAY:
+    # PROFILE CONNECTION:
     #
     # RAVESZN CLUB!
     # SZN FAM
@@ -317,8 +317,7 @@ def callback(
 
         json={
             "platform_name": "RAVESZN CLUB!",
-            "platform_username": "Verified"
-
+            "platform_username": "SZN FAM",
             "metadata": {
                 "member": "1"
             }
@@ -348,7 +347,7 @@ def callback(
         )
 
     # -----------------------------------------------------
-    # DELETE ONE-TIME OAUTH COOKIE
+    # SUCCESS
     # -----------------------------------------------------
 
     response = HTMLResponse("""
